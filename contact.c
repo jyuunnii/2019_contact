@@ -68,7 +68,7 @@ void getinfo(){
     struct contact addr[1000];
     char tmpStr[100];
     char find[50];
-    int i,count=0;
+    int i,try=0;
     char *tok;
 
 
@@ -90,7 +90,7 @@ void getinfo(){
             tok=strtok(NULL,",");
             strcpy(addr[i].phone,tok);
             printf("%s님의 핸드폰 번호는 %s 입니다.",find, addr[i].phone); 
-            count=0;
+            try=1;
             break;
         } //전체 일치
         
@@ -99,17 +99,23 @@ void getinfo(){
             printf(addr[i].name);
             printf("\n");
             i++;
+            
+            try=1;
         }// 첫 번째 글자 일치
 
         if((!strncmp(addr[i].name, find,3))&&(strlen(find)<=3)){       
             printf(addr[i].name);
             printf("\n");
             i++;
+
+            try=1;
         }// 첫 번째, 두 번째 글자 일치
 
     }
     
     fclose(rfp);
+
+    if(try != 1) printf("실패했습니다.\n");
 
 }
  
@@ -145,7 +151,7 @@ void update(){
     struct contact addr[1000];
     char tmpStr[100];
     char find[50];
-    int i,count,sel=0;
+    int i,count,sel,try=0;
     char *tok;
     char name[100];
     char phone[100];
@@ -153,6 +159,11 @@ void update(){
 
 
     rfp=fopen(newFileName,"r");
+
+    if(rfp == NULL){
+        perror("\n 파일을 찾을 수 없습니다.\n");
+        return;
+    }
     
     printf("수정할 이름을 입력해주세요 :");
     scanf("%s", &find);
@@ -197,7 +208,7 @@ void update(){
                 fclose(wfp);
             }
 
-
+            try=1;
             break;
         } 
 
@@ -209,130 +220,89 @@ void update(){
     }
     
     fclose(rfp);
+
+    if(try != 1) printf("실패했습니다.\n");
+
 }
 
 void delete(){
 
+   
     FILE *rfp, *wfp;
     struct contact addr[1000];
     char tmpStr[100];
-    char *tok;
-    int del_line, count=0;
-    int i,j,sel=0;
     char find[100];
+    int i,count,sel,try=0;
+    char *tok;
+    int del_line;
+
 
     rfp = fopen(newFileName,"r");
 
-    printf("삭제할 이름을 입력해주세요. \n");
+    if(rfp == NULL){
+        perror("\n 파일을 찾을 수 없습니다.\n");
+        return;
+    }
+
+    printf("삭제할 이름을 입력해주세요 :");
     scanf("%s", &find);
     fflush(stdin);
 
-    fscanf(rfp,"%s %s", addr[i].name,addr[i].phone);
-
-    if(strcmp(addr[i].name, find)==0) {
-        tok=strtok(NULL,",");
-        strcpy(addr[i].phone,tok);
-        printf("%s님의 핸드폰 번호는 %s 입니다./n",find, addr[i].phone); 
-        j=i;
-        i++;
-    } //전체 일치
+    while(!feof(rfp))
+    {
+        fscanf(rfp,"%s\t", &tmpStr); //reading csv file...
     
-    fclose(rfp);
+        tok=strtok(tmpStr,",");
+        strcpy(addr[i].name, tok);
 
-    printf("삭제하시겠습니까? (1 예| 2 아니오)\n");
-    scanf("%d", &sel);
+        if(strcmp(addr[i].name, find)==0) 
+        {
+            del_line=i;
+            tok=strtok(NULL,",");
+            strcpy(addr[i].phone,tok);
+            printf("%s님의 핸드폰 번호는 %s 입니다.\n",find, addr[i].phone); 
 
-    if(sel !=1 || sel !=2){
-        switch(sel){
-            case 1:
-                wfp = fopen(newFileName, "w");
-                strcpy(addr[j].name,"");
-                strcpy(addr[j].phone,"");
-                printf("삭제되었습니다.\n");
-                break;
-            case 2:
-                break;
+            printf("삭제하시겠습니까? (1 예| 2 아니오)\n");
+            scanf("%d", &sel);
+
+            if(sel !=1 || sel !=2){
+                switch(sel){
+                    case 1:
+                        strcpy(addr[del_line].name,"");
+                        strcpy(addr[del_line].phone,"");
+                  
+                        printf("삭제되었습니다.\n");
+                        break;
+                    case 2:
+                        break;
+                }
+                
+
+                wfp=fopen(newFileName,"w");
+                
+                for(int j=0; j<count+2; j++){
+                    if(strcmp(addr[j].name, "") != 0){
+                        fprintf(wfp,"%s,%s\n", addr[j].name, addr[j].phone);
+                    }
+                }
+                fclose(wfp);
+
+                
+            } 
+            
+            try=1;
+    
         }
-        fclose(wfp);
+        tok= strtok(NULL,",");
+        strcpy(addr[i].phone,tok);
 
-    
+        i++;
+        count++;
     }
 
-
-
-
-
-
-
-
-
-
-
-    // for(int i=0; i<100; i++){
-    //     if(fscanf(rfp, "%s %s", &addr[i].name, &addr[i].phone) == EOF){
-    //         break;
-    //     }
-    //     if(strcmp(addr[i].name,find)==0){
-    //         del_line=i;
-    //     }
-    //     count++;
-    // }
-
-    // fclose(rfp);
-
-
-
-    // FILE *rfp, *wfp, *wwfp;
-    // struct contact addr[100];
-    // char name[50], phone[50];
-    // char find[100];
-    // int del_line,count, cnt=0;
+    fclose(rfp);
     
-    // char str[100];
-
-    // rfp = fopen(newFileName,"r");
-
-    // if(rfp == NULL){
-    //     puts("\n No file\n");
-    //     return;
-    // }
-
-    // printf("삭제할 이름을 입력해주세요. \n");
-    // scanf("%s", &find);
-
-    // for(int i=0; i<sizeof(addr); i++){
-    //     if(fscanf(rfp, "%s %s", &addr[i].name, &addr[i].phone) == EOF){
-    //         break;
-    //     }
-    //     if(strcmp(addr[i].name,find)==0){
-    //         del_line=i;
-    //     }
-    // }
-
-
-    // for(int i=0; i<10;i++){
-    //     if(fscanf(rfp, "%s %s",&name,&phone)==EOF) break;
-
-    //     if(i+1 != del_line){
-    //         strcpy(addr[i].name, name);
-    //         strcpy(addr[i].phone,phone);
-
-    //         count++;
-    //     }else{
-    //         strcpy(addr[i].name,"");
-    //         strcpy(addr[i].phone,"");
-    //     }
-    // }
-    // fclose(rfp);
-
-    // wfp=fopen(newFileName,"w");
-
-    // for(int j=0; j<=count;j++){
-    //     if(strcmp(addr[j].name, "")!= 0){
-    //         fprintf(wfp, "%s %s\n", addr[j].name, addr[j].phone);
-    //     }
-    // }
-    // fclose(wfp);
+    if(try != 1) printf("실패했습니다.\n");
         
 }
 
