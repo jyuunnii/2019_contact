@@ -153,21 +153,16 @@ void update(){
     char find[50];
     int i,count,sel,try=0;
     char *tok;
-    char name[100];
-    char phone[100];
+    char name[100], phone[100];
     int up_line;
 
 
     rfp=fopen(newFileName,"r");
-
-    if(rfp == NULL){
-        perror("\n 파일을 찾을 수 없습니다.\n");
-        return;
-    }
     
     printf("수정할 이름을 입력해주세요 :");
     scanf("%s", &find);
     fflush(stdin);
+
   
     while(!feof(rfp))
     {
@@ -177,8 +172,8 @@ void update(){
         strcpy(addr[i].name, tok);
 
 
-        if(strcmp(addr[i].name, find)==0) { //검색어와 일치할 경우
-            up_line=i;
+        if(strcmp(addr[i].name, find)==0) 
+        { //검색어와 일치할 경우
             tok=strtok(NULL,",");
             strcpy(addr[i].phone,tok);
             printf("%s님의 핸드폰 번호는 %s 입니다.\n",find, addr[i].phone); 
@@ -191,36 +186,45 @@ void update(){
                     case 1:
                         printf("변경 후 이름을 입력하세요 : ");
                         scanf("%s", &name);
-                        strcpy(addr[up_line].name, name);
+                        strcpy(addr[i].name, name); //해당 값을 수정
+                        
+                        i++;
+                        count++;
                         break;
+
                     case 2:
                         printf("변경 후 핸드폰 번호를 입력하세요 : ");
                         scanf("%s",&phone);
-                        strcpy(addr[up_line].phone, phone);
+                        strcpy(addr[i].phone, phone);
+
+                        i++;
+                        count++;
                         break;
                 }
-
-                wfp=fopen(newFileName,"w");
-
-                for(int j=0; j<count+1; j++){
-                    fprintf(wfp, "%s,%s\n", addr[j].name, addr[j].phone);
-                }
-                fclose(wfp);
             }
-
+            
             try=1;
-            break;
+            continue;
         } 
 
         tok=strtok(NULL,",");
         strcpy(addr[i].phone,tok);
 
-        i++;
-        count++;
+        i++; //구조체 배열 ++
+        count++; //입력횟수 ++
     }
     
     fclose(rfp);
 
+    wfp=fopen(newFileName,"w");
+
+    for(int j=0; j<count; j++){
+        fprintf(wfp, "%s,%s\n", addr[j].name, addr[j].phone);
+    }
+
+    fclose(wfp);
+    
+    
     if(try != 1) printf("실패했습니다.\n");
 
 }
