@@ -65,12 +65,13 @@ int main()
 void search(){
 
     FILE *rf, *cf;
-    struct contact addr[1000];
+    struct contact addr[50000];
     char tmpStr[100];
     char find[50];
     int i,sel=0;
     int try, new=0;
     char *tok;
+    int firstNameCnt=0;
 
 
     rf=fopen(originalFileName,"r");
@@ -110,6 +111,7 @@ void search(){
             printf(addr[i].name);
             printf("\n");
             i++;
+            firstNameCnt++;
             try=1;
         }// 첫 번째 글자 일치
         
@@ -150,6 +152,7 @@ void search(){
             printf(addr[i].name);
             printf("\n");
             i++;
+            firstNameCnt++;
             try=1;
             new=1;
         }// 첫 번째 글자 일치
@@ -158,6 +161,10 @@ void search(){
     }
     
     fclose(cf);
+
+    if(firstNameCnt != 0){
+        printf("\n 같은 성을 가진 사람의 수는 %d명 입니다.\n", firstNameCnt);
+    }
 
     if(try != 1) {
         printf("검색 실패했습니다.\n");
@@ -216,17 +223,20 @@ void insert(){
     
     FILE *wf;
     struct contact addr ={"" ""};
-    char str[100];
+    char name[50];
+    char phone[11];
+    char str[11];
 
     wf = fopen(newFileName, "a");
 
     printf("등록할 회원 정보를 입력해주세요.\n 이름 : ");
-    scanf("%s", &str);
-    strcpy(addr.name, str);
+    scanf("%s", &name);
+    strcpy(addr.name, name);
 
+    
     printf("핸드폰 번호 : ");
-    scanf("%s", &str);
-    strcpy(addr.phone, str);
+    scanf("%s", &phone);
+    strcpy(addr.phone, phone);
 
     if(!(addr.name == NULL && addr.phone == NULL)){
         fprintf(wf,"%s,%s\n", addr.name, addr.phone);
@@ -270,7 +280,7 @@ void update(){
 
 
         if(strcmp(addr[i].name, find)==0) 
-        { //검색어와 일치할 경우
+        { 
             tok=strtok(NULL,",");
             strcpy(addr[i].phone,tok);
             printf("%s님의 핸드폰 번호는 %s 입니다.\n",find, addr[i].phone); 
@@ -283,7 +293,7 @@ void update(){
                     case 1:
                         printf("변경 후 이름을 입력하세요 : ");
                         scanf("%s", &name);
-                        strcpy(addr[i].name, name); //해당 값을 수정
+                        strcpy(addr[i].name, name); //수정한 값을 저장
                         printf("변경되었습니다.\n");
                         
                         i++;
@@ -353,7 +363,7 @@ void delete(){
 
     while(!feof(rf))
     {
-        fscanf(rf,"%s\t", &tmpStr); //reading csv file...
+        fscanf(rf,"%s\t", &tmpStr); 
     
         tok=strtok(tmpStr,",");
         strcpy(addr[i].name, tok);
@@ -370,7 +380,7 @@ void delete(){
             if(sel !=1 || sel !=2){
                 switch(sel){
                     case 1:
-                        strcpy(addr[i].name,"");
+                        strcpy(addr[i].name,""); //삭제할 값에 NULL 입력
                         strcpy(addr[i].phone,"");
                   
                         printf("삭제되었습니다.\n");
@@ -390,7 +400,7 @@ void delete(){
 
         tok= strtok(NULL,",");
         strcpy(addr[i].phone,tok);
-
+ 
         i++;
         count++;
     }
@@ -400,7 +410,7 @@ void delete(){
     wf=fopen(newFileName,"w");
                 
     for(int j=0; j<count+2; j++){
-        if(strcmp(addr[j].name, "") != 0){
+        if(strcmp(addr[j].name, "") != 0){ //NULL 값 제외하고 출력
             fprintf(wf,"%s,%s\n", addr[j].name, addr[j].phone);
         }
     }
